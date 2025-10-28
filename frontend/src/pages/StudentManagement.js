@@ -16,6 +16,8 @@ const StudentManagement = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
+  const user = typeof window !== 'undefined' && localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
+  const isAdmin = user?.role === 'admin';
   const [formData, setFormData] = useState({
     roll_number: '',
     name: '',
@@ -107,13 +109,14 @@ const StudentManagement = () => {
             </h1>
             <p className="text-gray-500 mt-2 text-lg">Manage student records and information</p>
           </div>
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="flex items-center gap-2" data-testid="add-student-button">
-                <Plus className="w-4 h-4" /> Add Student
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md">
+          {isAdmin && (
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="flex items-center gap-2" data-testid="add-student-button">
+                  <Plus className="w-4 h-4" /> Add Student
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
               <DialogHeader>
                 <DialogTitle>Add New Student</DialogTitle>
                 <DialogDescription>
@@ -187,8 +190,9 @@ const StudentManagement = () => {
                   </Button>
                 </div>
               </form>
-            </DialogContent>
-          </Dialog>
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
 
         {/* Stats Cards */}
@@ -259,9 +263,11 @@ const StudentManagement = () => {
               <div className="text-center py-12">
                 <Users className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                 <p className="text-gray-500">No students found</p>
-                <Button className="mt-4" onClick={() => setDialogOpen(true)} data-testid="add-first-student-button">
-                  <Plus className="w-4 h-4 mr-2" /> Add First Student
-                </Button>
+                {isAdmin && (
+                  <Button className="mt-4" onClick={() => setDialogOpen(true)} data-testid="add-first-student-button">
+                    <Plus className="w-4 h-4 mr-2" /> Add First Student
+                  </Button>
+                )}
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -298,15 +304,17 @@ const StudentManagement = () => {
                         </td>
                         <td className="py-3 px-4 text-gray-600 text-sm">{student.email || '-'}</td>
                         <td className="py-3 px-4 text-right">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDelete(student.id, student.name)}
-                            data-testid={`delete-student-${student.id}`}
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
+                          {isAdmin && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDelete(student.id, student.name)}
+                              data-testid={`delete-student-${student.id}`}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          )}
                         </td>
                       </tr>
                     ))}

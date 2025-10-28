@@ -13,6 +13,8 @@ const DepartmentManagement = () => {
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const user = typeof window !== 'undefined' && localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
+  const isAdmin = user?.role === 'admin';
   const [formData, setFormData] = useState({
     name: '',
     code: '',
@@ -87,11 +89,13 @@ const DepartmentManagement = () => {
             <p className="text-gray-500 mt-2 text-lg">Manage departments and their subjects</p>
           </div>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="flex items-center gap-2" data-testid="add-department-button">
-                <Plus className="w-4 h-4" /> Add Department
-              </Button>
-            </DialogTrigger>
+            {isAdmin && (
+              <DialogTrigger asChild>
+                <Button className="flex items-center gap-2" data-testid="add-department-button">
+                  <Plus className="w-4 h-4" /> Add Department
+                </Button>
+              </DialogTrigger>
+            )}
             <DialogContent className="max-w-md">
               <DialogHeader>
                 <DialogTitle>Add New Department</DialogTitle>
@@ -148,14 +152,16 @@ const DepartmentManagement = () => {
 
         {/* Departments Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {departments.length === 0 ? (
+                {departments.length === 0 ? (
             <Card className="col-span-full border-0 shadow-md">
               <CardContent className="text-center py-12">
                 <BookOpen className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                 <p className="text-gray-500">No departments found</p>
-                <Button className="mt-4" onClick={() => setDialogOpen(true)} data-testid="add-first-dept-button">
-                  <Plus className="w-4 h-4 mr-2" /> Add First Department
-                </Button>
+                {isAdmin && (
+                  <Button className="mt-4" onClick={() => setDialogOpen(true)} data-testid="add-first-dept-button">
+                    <Plus className="w-4 h-4 mr-2" /> Add First Department
+                  </Button>
+                )}
               </CardContent>
             </Card>
           ) : (
@@ -169,15 +175,17 @@ const DepartmentManagement = () => {
                         {dept.code}
                       </CardDescription>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDelete(dept.id, dept.name)}
-                      data-testid={`delete-dept-${dept.id}`}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                    {isAdmin && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(dept.id, dept.name)}
+                        data-testid={`delete-dept-${dept.id}`}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    )}
                   </div>
                 </CardHeader>
                 <CardContent>

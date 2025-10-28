@@ -11,7 +11,8 @@ import {
   LogOut, 
   Menu, 
   X,
-  Building2
+  Building2,
+  Eye
 } from 'lucide-react';
 
 const Layout = ({ children }) => {
@@ -20,6 +21,7 @@ const Layout = ({ children }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const isAdmin = user.role === 'admin';
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -27,7 +29,8 @@ const Layout = ({ children }) => {
     navigate('/login');
   };
 
-  const navigation = [
+  // Admin navigation
+  const adminNavigation = [
     { name: 'Dashboard', path: '/', icon: LayoutDashboard },
     { name: 'Students', path: '/students', icon: Users },
     { name: 'Departments', path: '/departments', icon: BookOpen },
@@ -36,6 +39,14 @@ const Layout = ({ children }) => {
     { name: 'Generate Seating', path: '/seating/generate', icon: FileText },
   ];
 
+  // Invigilator navigation
+  const invigilatorNavigation = [
+    { name: 'Dashboard', path: '/invigilator', icon: LayoutDashboard },
+    { name: 'View Exams', path: '/invigilator', icon: Eye },
+  ];
+
+  const navigation = isAdmin ? adminNavigation : invigilatorNavigation;
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -43,7 +54,7 @@ const Layout = ({ children }) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate(isAdmin ? '/' : '/invigilator')}>
               <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
                 <Building2 className="w-6 h-6 text-white" />
               </div>

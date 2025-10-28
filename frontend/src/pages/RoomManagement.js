@@ -13,6 +13,8 @@ const RoomManagement = () => {
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const user = typeof window !== 'undefined' && localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
+  const isAdmin = user?.role === 'admin';
   const [formData, setFormData] = useState({
     name: '',
     capacity: '',
@@ -92,11 +94,13 @@ const RoomManagement = () => {
             <p className="text-gray-500 mt-2 text-lg">Configure examination rooms and desk layouts</p>
           </div>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="flex items-center gap-2" data-testid="add-room-button">
-                <Plus className="w-4 h-4" /> Add Room
-              </Button>
-            </DialogTrigger>
+            {isAdmin && (
+              <DialogTrigger asChild>
+                <Button className="flex items-center gap-2" data-testid="add-room-button">
+                  <Plus className="w-4 h-4" /> Add Room
+                </Button>
+              </DialogTrigger>
+            )}
             <DialogContent className="max-w-md">
               <DialogHeader>
                 <DialogTitle>Add New Room</DialogTitle>
@@ -183,14 +187,16 @@ const RoomManagement = () => {
 
         {/* Rooms Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {rooms.length === 0 ? (
+                {rooms.length === 0 ? (
             <Card className="col-span-full border-0 shadow-md">
               <CardContent className="text-center py-12">
                 <Building className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                 <p className="text-gray-500">No rooms found</p>
-                <Button className="mt-4" onClick={() => setDialogOpen(true)} data-testid="add-first-room-button">
-                  <Plus className="w-4 h-4 mr-2" /> Add First Room
-                </Button>
+                {isAdmin && (
+                  <Button className="mt-4" onClick={() => setDialogOpen(true)} data-testid="add-first-room-button">
+                    <Plus className="w-4 h-4 mr-2" /> Add First Room
+                  </Button>
+                )}
               </CardContent>
             </Card>
           ) : (
@@ -204,15 +210,17 @@ const RoomManagement = () => {
                         {room.name}
                       </CardTitle>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDelete(room.id, room.name)}
-                      data-testid={`delete-room-${room.id}`}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                    {isAdmin && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(room.id, room.name)}
+                        data-testid={`delete-room-${room.id}`}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    )}
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3">

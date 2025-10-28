@@ -36,6 +36,12 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 1440  # 24 hours
 app = FastAPI()
 api_router = APIRouter(prefix="/api")
 
+
+# Simple API root/health endpoint to avoid 404s from frontend callers to /api
+@app.get("/api")
+async def api_root():
+    return {"ok": True, "message": "AutoSeater API running"}
+
 # Enums
 class UserRole(str, Enum):
     ADMIN = "admin"

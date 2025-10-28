@@ -19,6 +19,8 @@ const SeatingGeneration = () => {
   const [selectedExam, setSelectedExam] = useState('');
   const [selectedRooms, setSelectedRooms] = useState([]);
   const [seatingMode, setSeatingMode] = useState('two_per_desk');
+  const user = typeof window !== 'undefined' && localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
+  const isAdmin = user?.role === 'admin';
 
   useEffect(() => {
     fetchData();
@@ -284,12 +286,13 @@ const SeatingGeneration = () => {
                   </Alert>
                 )}
 
-                <Button
-                  className="w-full h-11 text-base font-semibold"
-                  data-testid="generate-seating-button"
-                  onClick={handleGenerate}
-                  disabled={!selectedExam || selectedRooms.length === 0 || generating}
-                >
+                <div>
+                  <Button
+                    className="w-full h-11 text-base font-semibold"
+                    data-testid="generate-seating-button"
+                    onClick={handleGenerate}
+                    disabled={!isAdmin || !selectedExam || selectedRooms.length === 0 || generating}
+                  >
                   {generating ? (
                     <>
                       <div className="spinner border-2 border-white border-t-transparent rounded-full w-4 h-4 mr-2"></div>
@@ -301,7 +304,11 @@ const SeatingGeneration = () => {
                       Generate Seating Plan
                     </>
                   )}
-                </Button>
+                  </Button>
+                  {!isAdmin && (
+                    <p className="text-sm text-red-600 mt-2">Only admin users can generate seating plans. Please login as an admin.</p>
+                  )}
+                </div>
               </CardContent>
             </Card>
           </div>

@@ -1,8 +1,28 @@
 import axios from 'axios';
 import { toast } from 'sonner';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API_BASE = `${BACKEND_URL}/api`;
+// Use REACT_APP_BACKEND_URL if provided.
+// In the browser (development) prefer a relative '/api' base so CRA's proxy can forward requests and avoid CORS/port issues.
+// If REACT_APP_BACKEND_URL is explicitly set (e.g., running against a remote backend), use that.
+const explicitBackend = process.env.REACT_APP_BACKEND_URL;
+let API_BASE;
+if (explicitBackend) {
+  const BACKEND_URL = explicitBackend;
+  API_BASE = `${BACKEND_URL.replace(/\/$/, '')}/api`;
+} else if (typeof window !== 'undefined') {
+  // running in browser and no explicit backend -> use relative path so the dev server proxy kicks in
+  API_BASE = '/api';
+} else {
+  // non-browser (server-side) fallback to localhost
+  const BACKEND_URL = 'http://localhost:8000';
+  API_BASE = `${BACKEND_URL.replace(/\/$/, '')}/api`;
+}
+
+// Helpful debug log to surface the API base when the frontend runs
+if (typeof window !== 'undefined') {
+  // eslint-disable-next-line no-console
+  console.debug('[api] API_BASE=', API_BASE, 'REACT_APP_BACKEND_URL=', process.env.REACT_APP_BACKEND_URL);
+}
 
 const api = axios.create({
   baseURL: API_BASE,
@@ -31,10 +51,18 @@ api.interceptors.response.use(
       localStorage.removeItem('user');
       window.location.href = '/login';
     }
-    
+
+    // Friendly handling for forbidden (admin-only) errors
+    if (error.response?.status === 403) {
+      toast.error('Admin access required to perform this action.');
+      return Promise.reject(error);
+    }
+
+    // include the request URL in the toast to make debugging easier
+    const requestUrl = error.config?.baseURL ? (error.config.baseURL + (error.config.url || '')) : (error.config?.url || error.response?.request?.responseURL);
     const message = error.response?.data?.detail || error.message || 'An error occurred';
-    toast.error(message);
-    
+    toast.error(`${message} ${requestUrl ? '(' + requestUrl + ')' : ''}`);
+
     return Promise.reject(error);
   }
 );

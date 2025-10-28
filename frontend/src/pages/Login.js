@@ -112,6 +112,10 @@ const Login = () => {
               </Button>
             </form>
 
+            <div className="mt-4 text-center">
+              <a className="text-sm text-indigo-100 underline cursor-pointer" onClick={() => navigate('/register')}>Create an account</a>
+            </div>
+
             <div className="mt-6 text-center text-sm text-gray-500">
               <p>Demo Credentials:</p>
               <p className="font-mono text-xs mt-1">admin / admin123</p>
